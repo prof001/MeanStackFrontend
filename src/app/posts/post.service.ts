@@ -27,15 +27,23 @@ export class PostService {
       );
   }
 
-  addPost(title: string, content: string) {
-    const post: Post = {
-      id: null,
-      title,
-      content
-    };
-    this.http.post('http://localhost:3000/api/v1/posts/addPost', post)
+  addPost(title: string, content: string, image: File) {
+    const postData = new FormData();
+    postData.append('title', title);
+    postData.append('content', content);
+    postData.append('image', image, title);
+
+    this.http.post('http://localhost:3000/api/v1/posts/addPost', postData)
       .subscribe(
         responseData => {
+
+          const post: Post = {
+            // @ts-ignore
+            id: responseData.id,
+            title,
+            content
+          };
+
           this.posts.push(post);
           this.postsUpdated.next([...this.posts]);
           this.router.navigate(['/']);
@@ -58,6 +66,7 @@ export class PostService {
     return this.postsUpdated.asObservable();
   }
 
+  // TODO Make this get post from the server
   getPost(id: string) {
     return {...this.posts.find(p => p.id === +id)};
   }
@@ -70,4 +79,6 @@ export class PostService {
         this.router.navigate(['/']);
       });
   }
+
+  // (change)="onImagePicked($event)";
 }
